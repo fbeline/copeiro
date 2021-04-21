@@ -20,20 +20,11 @@ defmodule Copeiro do
   # end
 
   defmacro assert_lists({:in, _meta, [left, right]}) do
-    combinations = for l <- left, r <- right, do: Copeiro.__match__(l, r)
+    combinations = Copeiro.__match_combinations__(left, right)
 
     quote do
-      combinations = unquote(combinations)
-
-      combinations
-      |> Enum.group_by(fn [l, _, _] -> l end)
-      |> Map.values()
-      |> Enum.filter(fn results ->
-        results
-        |> Enum.any?(fn [_, _, ok?] -> ok? end)
-        |> Kernel.not()
-      end)
-      |> Enum.reduce([], fn [[l, _, _] | _], acc -> [l | acc] end)
+      unquote(combinations)
+      |> Copeiro.__reduce_combinations__()
       |> case do
         [] ->
           assert true
@@ -47,11 +38,39 @@ defmodule Copeiro do
     end
   end
 
-  def __match__(left, right) do
-    [
-      Macro.to_string(left),
-      Macro.to_string(right),
-      {:match?, [], [left, right]}
-    ]
+  defmacro assert_lists({:not, _, [{:in, _, [left, right]}]}) do
+    combinations = Copeiro.__match_combinations__(left, right)
+
+    quote do
+      unquote(combinations)
+      |> Copeiro.__reduce_combinations__(:not_in)
+      |> case do
+        [] ->
+          assert true
+
+        patterns ->
+          ExUnit.Assertions.flunk("""
+          matched patterns: #{Enum.join(patterns, ", ")}
+          right: #{inspect(unquote(right))}
+          """)
+      end
+    end
+  end
+
+  def __reduce_combinations__(combinations, op \\ :in) do
+    combinations
+    |> Enum.filter(fn r ->
+      any? = Enum.any?(r, fn [ok?, _] -> ok? end)
+      if op == :not_in, do: any?, else: not any?
+    end)
+    |> Enum.reduce([], fn [[_, l] | _], acc -> [l | acc] end)
+  end
+
+  def __match_combinations__(left, right) do
+    Enum.map(left, fn l ->
+      Enum.map(right, fn r ->
+        [{:match?, [], [l, r]}, Macro.to_string(l)]
+      end)
+    end)
   end
 end

@@ -26,7 +26,25 @@ defmodule CopeiroTest do
       assert_lists([{3, _}, {2, 2}] in [{1, 2}, {2, 3}])
     rescue
       error in [ExUnit.AssertionError] ->
-        assert "could not match patterns: {3, _}, {2, 2}" <> _ = error.message
+        assert "could not match patterns: {2, 2}, {3, _}" <> _ = error.message
+    end
+  end
+
+  describe "assert_lists - operator: not in -" do
+    test "pattern not present" do
+      assert_lists([%{a: 10}] not in [%{a: 1, b: 1}, %{a: 2, b: 2}])
+    end
+
+    test "contains pattern" do
+      assert_lists([%{a: 3, b: 1}] not in [%{a: 1, b: 1}, %{a: 2, b: 2}])
+    rescue
+      error in [ExUnit.AssertionError] ->
+        assert "matched patterns: %{a: 3, b: 1}" <> _ = error.message
+    end
+
+    test "able to match custom patterns" do
+      value = 3
+      assert_lists([%{a: _, b: ^value}] not in [%{a: 1, b: 1}, %{a: 2, b: 2}])
     end
   end
 end
