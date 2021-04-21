@@ -2,22 +2,17 @@ defmodule Copeiro do
   @moduledoc """
   """
 
-  # defmacro assert_lists({:=, meta, [left, right]}, key) do
-  #   sleft =
-  #     left
-  #     |> Enum.sort_by(fn {_, _, values} ->
-  #       Keyword.get(values, key)
-  #     end)
+  defmacro assert_lists({op, _, [left, right]}, :any_order) when op == := or op == :== do
+    quote do
+      unquote({:assert, [], [{op, [], [left, right]}]})
+    end
+  end
 
-  #   sright =
-  #     quote do
-  #       unquote(right) |> Enum.sort_by(fn m -> Map.get(m, unquote(key)) end)
-  #     end
-
-  #   quote do
-  #     unquote({:assert, meta, [{:=, [], [sleft, sright]}]})
-  #   end
-  # end
+  defmacro assert_lists({op, _, [left, right]}) when op == := or op == :== do
+    quote do
+      unquote({:assert, [], [{op, [], [left, right]}]})
+    end
+  end
 
   defmacro assert_lists({:in, _meta, [left, right]}) do
     combinations = Copeiro.__match_combinations__(left, right)

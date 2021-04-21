@@ -1,5 +1,8 @@
 # Copeiro
 
+![L'Echanson_-_Allégorie_de_la_Tempérance](https://user-images.githubusercontent.com/5730881/115628971-d929dd80-a2d7-11eb-89d7-dade63df0c6d.JPG)
+
+
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed

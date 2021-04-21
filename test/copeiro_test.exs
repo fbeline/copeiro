@@ -5,6 +5,19 @@ defmodule CopeiroTest do
   require Copeiro
   import Copeiro
 
+  describe "assert_lists - operator: = and == -" do
+    test "valid pattern" do
+      v = 1
+      assert_lists([1, 2] = [1, 2])
+      assert_lists([1, _] = [1, 2])
+      assert_lists([^v, _] = [1, 2])
+    end
+
+    test "valid pattern in any order" do
+      assert_lists([0, 2, 1] = [0, 1, 2], :any_order)
+    end
+  end
+
   describe "assert_lists - operator: in -" do
     test "contains pattern" do
       assert_lists([%{a: 1}] in [%{a: 1, b: 1}, %{a: 2, b: 2}])
