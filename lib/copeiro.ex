@@ -2,13 +2,25 @@ defmodule Copeiro do
   @moduledoc """
   """
 
-  defmacro assert_lists({op, _, [left, right]}, :any_order) when op == := or op == :== do
+  defmacro assert_lists({op, _, [left, right]}, :any_order) when op in [:=, :==] do
     quote do
-      unquote({:assert, [], [{op, [], [left, right]}]})
+      r = Copeiro.__match_lists_at_any_order__(unquote(left), unquote(right))
+
+      case r do
+        :ok ->
+          true
+
+        {:error, l, r} ->
+          ExUnit.Assertions.flunk("""
+          lists does not match
+          left: #{inspect(l)}
+          right: #{inspect(r)}
+          """)
+      end
     end
   end
 
-  defmacro assert_lists({op, _, [left, right]}) when op == := or op == :== do
+  defmacro assert_lists({op, _, [left, right]}) when op in [:=, :==] do
     quote do
       unquote({:assert, [], [{op, [], [left, right]}]})
     end
@@ -22,7 +34,7 @@ defmodule Copeiro do
       |> Copeiro.__reduce_combinations__()
       |> case do
         [] ->
-          assert true
+          true
 
         missing_patterns ->
           ExUnit.Assertions.flunk("""
@@ -41,7 +53,7 @@ defmodule Copeiro do
       |> Copeiro.__reduce_combinations__(:not_in)
       |> case do
         [] ->
-          assert true
+          true
 
         patterns ->
           ExUnit.Assertions.flunk("""
@@ -67,5 +79,28 @@ defmodule Copeiro do
         [{:match?, [], [l, r]}, Macro.to_string(l)]
       end)
     end)
+  end
+
+  def __match_lists_at_any_order__([], []) do
+    :ok
+  end
+
+  def __match_lists_at_any_order__([], right) do
+    {:error, [], right}
+  end
+
+  def __match_lists_at_any_order__([left | t], right) do
+    right
+    |> Enum.find_index(&(&1 == left))
+    |> case do
+      nil ->
+        {:error, left, right}
+
+      idx ->
+        __match_lists_at_any_order__(
+          t,
+          List.delete_at(right, idx)
+        )
+    end
   end
 end

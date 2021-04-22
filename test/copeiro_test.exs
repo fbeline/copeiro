@@ -6,15 +6,30 @@ defmodule CopeiroTest do
   import Copeiro
 
   describe "assert_lists - operator: = and == -" do
-    test "valid pattern" do
+    test "sanity pattern matching" do
       v = 1
       assert_lists([1, 2] = [1, 2])
       assert_lists([1, _] = [1, 2])
       assert_lists([^v, _] = [1, 2])
     end
 
-    test "valid pattern in any order" do
-      assert_lists([0, 2, 1] = [0, 1, 2], :any_order)
+    test "in any order" do
+      assert_lists([0, 2, 1] == [0, 1, 2], :any_order)
+      assert_lists([%{a: 1}, %{b: 2}, %{c: 3}] == [%{a: 1}, %{c: 3}, %{b: 2}], :any_order)
+    end
+
+    test "in any order - more elements at left" do
+      assert_lists([0, 2, 1, 3] == [0, 1, 2], :any_order)
+    rescue
+      error in [ExUnit.AssertionError] ->
+        assert "lists does not match" <> _ = error.message
+    end
+
+    test "in any order - more elements at right" do
+      assert_lists([0, 2, 1] == [0, 1, 2, 3], :any_order)
+    rescue
+      error in [ExUnit.AssertionError] ->
+        assert "lists does not match" <> _ = error.message
     end
   end
 
