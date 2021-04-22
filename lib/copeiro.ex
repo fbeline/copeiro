@@ -1,7 +1,33 @@
 defmodule Copeiro do
   @moduledoc """
+  This module contains a set of assertion functions that enhance your testing experience.
   """
 
+  @doc """
+  Asserts that two lists matches
+
+  ## Examples
+
+    assert_lists [1, _, _] = [1, 2, 3]
+
+    assert_lists [1, 2, 3] == [1, 2, 3]
+
+  ### Asserts at any order
+
+    assert_lists [1, 2, 3] == [2, 1, 3], :any_order
+
+  ### Asserts that contains
+
+    assert_lists [{:b, _}] in [{:a, 1}, {:b, 2}]
+
+    assert_lists [{:b, 2}] in [{:a, 1}, {:b, 2}]
+
+  ### Asserts that not contains
+
+    assert_lists [{:c, _}] not in [{:a, 1}, {:b, 2}]
+
+    assert_lists [{:c, 3}] not in [{:a, 1}, {:b, 2}]
+  """
   defmacro assert_lists({op, _, [left, right]}, :any_order) when op in [:=, :==] do
     quote do
       r = Copeiro.__match_lists_at_any_order__(unquote(left), unquote(right))
@@ -64,6 +90,7 @@ defmodule Copeiro do
     end
   end
 
+  @doc false
   def __reduce_combinations__(combinations, op \\ :in) do
     combinations
     |> Enum.filter(fn r ->
@@ -73,6 +100,7 @@ defmodule Copeiro do
     |> Enum.reduce([], fn [[_, l] | _], acc -> [l | acc] end)
   end
 
+  @doc false
   def __match_combinations__(left, right) do
     Enum.map(left, fn l ->
       Enum.map(right, fn r ->
@@ -81,6 +109,7 @@ defmodule Copeiro do
     end)
   end
 
+  @doc false
   def __match_lists_at_any_order__([], []) do
     :ok
   end
