@@ -7,14 +7,19 @@ defmodule Copeiro.MixProject do
       version: "0.1.0",
       elixir: "~> 1.9",
       deps: deps(),
-      description: "The Copeiro package provides assertion functions that will enhance your testing experience in Elixir",
+      name: "Copeiro",
+      source_url: "https://github.com/fbeline/copeiro",
+      description:
+        "The Copeiro package provides assertion functions that will enhance your testing experience in Elixir",
       package: [
         files: ~w(lib mix.exs README.md LICENSE .formatter.exs),
         licenses: ["MIT"],
         links: %{"GitHub" => "https://github.com/fbeline/copeiro"}
       ],
-      name: "Copeiro",
-      source_url: "https://github.com/fbeline/copeiro"
+      docs: [
+        main: "Copeiro",
+        extras: ["README.md"]
+      ]
     ]
   end
 
@@ -23,6 +28,6 @@ defmodule Copeiro.MixProject do
   end
 
   defp deps do
-    []
+    [{:ex_doc, "~> 0.24", only: :dev, runtime: false}]
   end
 end

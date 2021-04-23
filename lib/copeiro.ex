@@ -1,32 +1,18 @@
 defmodule Copeiro do
   @moduledoc """
-  This module contains a set of assertion functions that enhance your testing experience.
+  The Copeiro package provides assertion functions that will enhance your testing experience in Elixir
   """
 
   @doc """
-  Asserts that two lists matches
+  Asserts that two lists matches in any order
 
   ## Examples
 
-    assert_lists [1, _, _] = [1, 2, 3]
-
-    assert_lists [1, 2, 3] == [1, 2, 3]
-
-  ### Asserts at any order
-
+  ```
     assert_lists [1, 2, 3] == [2, 1, 3], :any_order
 
-  ### Asserts that contains
-
-    assert_lists [{:b, _}] in [{:a, 1}, {:b, 2}]
-
-    assert_lists [{:b, 2}] in [{:a, 1}, {:b, 2}]
-
-  ### Asserts that not contains
-
-    assert_lists [{:c, _}] not in [{:a, 1}, {:b, 2}]
-
-    assert_lists [{:c, 3}] not in [{:a, 1}, {:b, 2}]
+    assert_lists [{:a, 0}, {:b 1}, {:c, 3}] == [{:a, 0}, {:c, 3}, {:b 1}], :any_order
+  ```
   """
   defmacro assert_lists({op, _, [left, right]}, :any_order) when op in [:=, :==] do
     quote do
@@ -46,6 +32,33 @@ defmodule Copeiro do
     end
   end
 
+  @doc """
+  Asserts that two lists matches
+
+  ## Examples
+
+  ```
+    assert_lists [1, _, _] = [1, 2, 3]
+
+    assert_lists [1, 2, 3] == [1, 2, 3]
+  ```
+
+  ### Asserts that contains
+
+  ```
+    assert_lists [{:b, _}] in [{:a, 1}, {:b, 2}]
+
+    assert_lists [{:b, 2}] in [{:a, 1}, {:b, 2}]
+  ```
+
+  ### Asserts that not contains
+
+  ```
+    assert_lists [{:c, _}] not in [{:a, 1}, {:b, 2}]
+
+    assert_lists [{:c, 3}] not in [{:a, 1}, {:b, 2}]
+  ```
+  """
   defmacro assert_lists({op, _, [left, right]}) when op in [:=, :==] do
     quote do
       unquote({:assert, [], [{op, [], [left, right]}]})
