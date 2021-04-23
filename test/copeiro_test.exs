@@ -1,9 +1,10 @@
 defmodule CopeiroTest do
   use ExUnit.Case
-  doctest Copeiro
 
   require Copeiro
   import Copeiro
+
+  doctest Copeiro
 
   describe "assert_lists - operator: = and == -" do
     test "sanity pattern matching" do
@@ -68,7 +69,7 @@ defmodule CopeiroTest do
       assert_lists [%{a: 3, b: 1}] not in [%{a: 1, b: 1}, %{a: 2, b: 2}]
     rescue
       error in [ExUnit.AssertionError] ->
-        assert "matched patterns: %{a: 3, b: 1}" <> _ = error.message
+        assert "match succeeded, but should have failed" <> _ = error.message
     end
 
     test "able to match custom patterns" do

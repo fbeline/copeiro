@@ -4,7 +4,7 @@ defmodule Copeiro do
   """
 
   @doc false
-  def __assert_lists__({:==, _, [left, right]}, [any_order: true]) do
+  def __assert_lists__({:==, _, [left, right]}, any_order: true) do
     quote do
       r = Copeiro.__match_lists_at_any_order__(unquote(left), unquote(right))
 
@@ -22,13 +22,7 @@ defmodule Copeiro do
     end
   end
 
-  def __assert_lists__({op, _, [left, right]}, _opts) when op in [:=, :==] do
-    quote do
-      unquote({:assert, [], [{op, [], [left, right]}]})
-    end
-  end
-
-  def __assert_lists__({:in, _meta, [left, right]}, _opts) do
+  def __assert_lists__({:in, _, [left, right]}, _opts) do
     combinations = Copeiro.__match_combinations__(left, right)
 
     quote do
@@ -59,10 +53,17 @@ defmodule Copeiro do
 
         patterns ->
           ExUnit.Assertions.flunk("""
-          matched patterns: #{Enum.join(patterns, ", ")}
+          match succeeded, but should have failed
+          left: #{Enum.join(patterns, ", ")}
           right: #{inspect(unquote(right))}
           """)
       end
+    end
+  end
+
+  def __assert_lists__({op, _, [left, right]}, _opts) when op in [:=, :==] do
+    quote do
+      unquote({:assert, [], [{op, [], [left, right]}]})
     end
   end
 
@@ -80,7 +81,19 @@ defmodule Copeiro do
   def __match_combinations__(left, right) do
     Enum.map(left, fn l ->
       Enum.map(right, fn r ->
-        [{:match?, [], [l, r]}, Macro.to_string(l)]
+        [
+          {:case, [],
+           [
+             r,
+             [
+               do: [
+                 {:->, [generated: true], [[l], true]},
+                 {:->, [generated: true], [[{:_, [], Elixir}], false]}
+               ]
+             ]
+           ]},
+          Macro.to_string(l)
+        ]
       end)
     end)
   end
@@ -113,36 +126,49 @@ defmodule Copeiro do
   Asserts that two lists matches
 
   ## Examples
+    ```
+    iex> assert_lists [1, _, _] = [1, 2, 3]
+    [1, 2, 3]
 
-  ```
-    assert_lists [1, _, _] = [1, 2, 3]
-
-    assert_lists [1, 2, 3] == [1, 2, 3]
-  ```
+    iex> assert_lists [1, 2, 3] == [1, 2, 3]
+    true
+    ```
 
   ### Asserts that two lists matches in any order
 
-  ```
-    assert_lists [1, 2, 3] == [2, 1, 3], any_order: true
+    ```
+    iex> assert_lists [1, 2, 3] == [2, 1, 3], any_order: true
+    true
 
-    assert_lists [{:a, 0}, {:b 1}, {:c, 3}] == [{:a, 0}, {:c, 3}, {:b 1}], any_order: true
-  ```
+    iex> assert_lists [{:a, 0}, {:b, 1}, {:c, 3}] == [{:a, 0}, {:c, 3}, {:b, 1}], any_order: true
+    true
+    ```
 
   ### Asserts that contains
 
-  ```
-    assert_lists [{:b, _}] in [{:a, 1}, {:b, 2}]
+    ```
+    iex> assert_lists [1, 2] in [0, 2, 1, 3]
+    true
 
-    assert_lists [{:b, 2}] in [{:a, 1}, {:b, 2}]
-  ```
+    iex> assert_lists [{:b, _}, {:a, 1}] in [{:a, 1}, {:b, 2}, {:c, 3}]
+    true
+
+    iex> assert_lists [{:b, 2}] in [{:a, 1}, {:b, 2}]
+    true
+    ```
 
   ### Asserts that not contains
 
-  ```
-    assert_lists [{:c, _}] not in [{:a, 1}, {:b, 2}]
+    ```
+    iex> assert_lists [1, 2] not in [3, 4]
+    true
 
-    assert_lists [{:c, 3}] not in [{:a, 1}, {:b, 2}]
-  ```
+    iex> assert_lists [{:c, _}] not in [{:a, 1}, {:b, 2}]
+    true
+
+    iex> assert_lists [%{c: 3}, %{d: 4}] not in [%{a: 1}, %{b: 2}]
+    true
+    ```
   """
   defmacro assert_lists(expr, opts \\ []) do
     quote do: unquote(__assert_lists__(expr, opts))
