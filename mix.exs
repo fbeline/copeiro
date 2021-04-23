@@ -28,6 +28,9 @@ defmodule Copeiro.MixProject do
   end
 
   defp deps do
-    [{:ex_doc, "~> 0.24", only: :dev, runtime: false}]
+    [
+      {:ex_doc, "~> 0.24", only: :dev, runtime: false},
+      {:credo, "~> 1.5", only: [:dev, :test], runtime: false}
+    ]
   end
 end

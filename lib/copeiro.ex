@@ -3,6 +3,7 @@ defmodule Copeiro do
   The Copeiro package provides assertion functions that will enhance your testing experience in Elixir
   """
 
+  @doc false
   def __assert_lists__({:==, _, [left, right]}, [any_order: true]) do
     quote do
       r = Copeiro.__match_lists_at_any_order__(unquote(left), unquote(right))
@@ -122,9 +123,9 @@ defmodule Copeiro do
   ### Asserts that two lists matches in any order
 
   ```
-    assert_lists [1, 2, 3] == [2, 1, 3], :any_order
+    assert_lists [1, 2, 3] == [2, 1, 3], any_order: true
 
-    assert_lists [{:a, 0}, {:b 1}, {:c, 3}] == [{:a, 0}, {:c, 3}, {:b 1}], :any_order
+    assert_lists [{:a, 0}, {:b 1}, {:c, 3}] == [{:a, 0}, {:c, 3}, {:b 1}], any_order: true
   ```
 
   ### Asserts that contains
