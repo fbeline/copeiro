@@ -7,7 +7,7 @@ defmodule Copeiro.MixProject do
       version: "0.1.0",
       elixir: "~> 1.9",
       deps: deps(),
-      description: "The Copeiro provides some helpful assertion functions that will enhance your test experience in Elixir.",
+      description: "The Copeiro package provides assertion functions that will enhance your testing experience in Elixir",
       package: [
         files: ~w(lib mix.exs README.md LICENSE .formatter.exs),
         licenses: ["MIT"],
