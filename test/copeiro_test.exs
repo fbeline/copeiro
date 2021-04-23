@@ -14,19 +14,20 @@ defmodule CopeiroTest do
     end
 
     test "in any order" do
-      assert_lists [0, 2, 1] == [0, 1, 2], :any_order
-      assert_lists [%{a: 1}, %{b: 2}, %{c: 3}] == [%{a: 1}, %{c: 3}, %{b: 2}], :any_order
+      assert_lists [0, 2, 1] == [0, 1, 2], any_order: true
+
+      assert_lists [%{a: 1}, %{b: 2}, %{c: 3}] == [%{a: 1}, %{c: 3}, %{b: 2}], any_order: true
     end
 
     test "in any order - more elements at left" do
-      assert_lists [0, 2, 1, 3] == [0, 1, 2], :any_order
+      assert_lists [0, 2, 1, 3] == [0, 1, 2], any_order: true
     rescue
       error in [ExUnit.AssertionError] ->
         assert "lists does not match" <> _ = error.message
     end
 
     test "in any order - more elements at right" do
-      assert_lists [0, 2, 1] == [0, 1, 2, 3], :any_order
+      assert_lists [0, 2, 1] == [0, 1, 2, 3], any_order: true
     rescue
       error in [ExUnit.AssertionError] ->
         assert "lists does not match" <> _ = error.message

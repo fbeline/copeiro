@@ -3,18 +3,7 @@ defmodule Copeiro do
   The Copeiro package provides assertion functions that will enhance your testing experience in Elixir
   """
 
-  @doc """
-  Asserts that two lists matches in any order
-
-  ## Examples
-
-  ```
-    assert_lists [1, 2, 3] == [2, 1, 3], :any_order
-
-    assert_lists [{:a, 0}, {:b 1}, {:c, 3}] == [{:a, 0}, {:c, 3}, {:b 1}], :any_order
-  ```
-  """
-  defmacro assert_lists({op, _, [left, right]}, :any_order) when op in [:=, :==] do
+  def __assert_lists__({:==, _, [left, right]}, [any_order: true]) do
     quote do
       r = Copeiro.__match_lists_at_any_order__(unquote(left), unquote(right))
 
@@ -32,40 +21,13 @@ defmodule Copeiro do
     end
   end
 
-  @doc """
-  Asserts that two lists matches
-
-  ## Examples
-
-  ```
-    assert_lists [1, _, _] = [1, 2, 3]
-
-    assert_lists [1, 2, 3] == [1, 2, 3]
-  ```
-
-  ### Asserts that contains
-
-  ```
-    assert_lists [{:b, _}] in [{:a, 1}, {:b, 2}]
-
-    assert_lists [{:b, 2}] in [{:a, 1}, {:b, 2}]
-  ```
-
-  ### Asserts that not contains
-
-  ```
-    assert_lists [{:c, _}] not in [{:a, 1}, {:b, 2}]
-
-    assert_lists [{:c, 3}] not in [{:a, 1}, {:b, 2}]
-  ```
-  """
-  defmacro assert_lists({op, _, [left, right]}) when op in [:=, :==] do
+  def __assert_lists__({op, _, [left, right]}, _opts) when op in [:=, :==] do
     quote do
       unquote({:assert, [], [{op, [], [left, right]}]})
     end
   end
 
-  defmacro assert_lists({:in, _meta, [left, right]}) do
+  def __assert_lists__({:in, _meta, [left, right]}, _opts) do
     combinations = Copeiro.__match_combinations__(left, right)
 
     quote do
@@ -84,7 +46,7 @@ defmodule Copeiro do
     end
   end
 
-  defmacro assert_lists({:not, _, [{:in, _, [left, right]}]}) do
+  def __assert_lists__({:not, _, [{:in, _, [left, right]}]}, _opts) do
     combinations = Copeiro.__match_combinations__(left, right)
 
     quote do
@@ -144,5 +106,44 @@ defmodule Copeiro do
           List.delete_at(right, idx)
         )
     end
+  end
+
+  @doc """
+  Asserts that two lists matches
+
+  ## Examples
+
+  ```
+    assert_lists [1, _, _] = [1, 2, 3]
+
+    assert_lists [1, 2, 3] == [1, 2, 3]
+  ```
+
+  ### Asserts that two lists matches in any order
+
+  ```
+    assert_lists [1, 2, 3] == [2, 1, 3], :any_order
+
+    assert_lists [{:a, 0}, {:b 1}, {:c, 3}] == [{:a, 0}, {:c, 3}, {:b 1}], :any_order
+  ```
+
+  ### Asserts that contains
+
+  ```
+    assert_lists [{:b, _}] in [{:a, 1}, {:b, 2}]
+
+    assert_lists [{:b, 2}] in [{:a, 1}, {:b, 2}]
+  ```
+
+  ### Asserts that not contains
+
+  ```
+    assert_lists [{:c, _}] not in [{:a, 1}, {:b, 2}]
+
+    assert_lists [{:c, 3}] not in [{:a, 1}, {:b, 2}]
+  ```
+  """
+  defmacro assert_lists(expr, opts \\ []) do
+    quote do: unquote(__assert_lists__(expr, opts))
   end
 end
