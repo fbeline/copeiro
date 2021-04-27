@@ -126,11 +126,34 @@ defmodule Copeiro do
   Asserts that two lists matches
 
   ## Examples
-    ```
-    iex> assert_lists [1, _, _] = [1, 2, 3]
-    [1, 2, 3]
 
-    iex> assert_lists [1, 2, 3] == [1, 2, 3]
+  For the following examples we will use `LEFT` and `RIGHT` to describe the expression
+
+  `assert_lists LEFT OPERATOR RIGHT`
+
+  ### All elements of `LEFT` are also elements of `B`
+
+    ```
+    iex> assert_lists [1, 2] in [0, 2, 1, 3]
+    true
+
+    iex> assert_lists [{:b, _}, {:a, 1}] in [{:a, 1}, {:b, 2}, {:c, 3}]
+    true
+
+    iex> assert_lists [%{b: 2}] in [%{a: 1}, %{b: 2, c: 10}]
+    true
+    ```
+
+  ### `LEFT` and `RIGHT` has no element in common
+
+    ```
+    iex> assert_lists [1, 2] not in [3, 4]
+    true
+
+    iex> assert_lists [{:c, _}] not in [{:a, 1}, {:b, 2}]
+    true
+
+    iex> assert_lists [%{c: 3}, %{d: 4}] not in [%{a: 1}, %{b: 2}]
     true
     ```
 
@@ -141,32 +164,6 @@ defmodule Copeiro do
     true
 
     iex> assert_lists [{:a, 0}, {:b, 1}, {:c, 3}] == [{:a, 0}, {:c, 3}, {:b, 1}], any_order: true
-    true
-    ```
-
-  ### Asserts that contains
-
-    ```
-    iex> assert_lists [1, 2] in [0, 2, 1, 3]
-    true
-
-    iex> assert_lists [{:b, _}, {:a, 1}] in [{:a, 1}, {:b, 2}, {:c, 3}]
-    true
-
-    iex> assert_lists [{:b, 2}] in [{:a, 1}, {:b, 2}]
-    true
-    ```
-
-  ### Asserts that not contains
-
-    ```
-    iex> assert_lists [1, 2] not in [3, 4]
-    true
-
-    iex> assert_lists [{:c, _}] not in [{:a, 1}, {:b, 2}]
-    true
-
-    iex> assert_lists [%{c: 3}, %{d: 4}] not in [%{a: 1}, %{b: 2}]
     true
     ```
   """
