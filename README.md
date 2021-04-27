@@ -1,16 +1,31 @@
 # Copeiro [![Elixir CI](https://github.com/fbeline/copeiro/actions/workflows/elixir.yml/badge.svg?branch=master)](https://github.com/fbeline/copeiro/actions/workflows/elixir.yml)
 
-![L'Echanson_-_Allégorie_de_la_Tempérance](https://user-images.githubusercontent.com/5730881/115628971-d929dd80-a2d7-11eb-89d7-dade63df0c6d.JPG)
+<img align="left" height="300" src="https://user-images.githubusercontent.com/5730881/116327729-cf9fea00-a79d-11eb-9be4-d4fa5ece38ae.jpg">
+
+
+>  With Copeiro, you can do twice the work in half the time.
+>
+> -- <cite>satisfied customer</cite>
+
+### Reasons:
+
+- Only $0
+- 90 Day Money Back Guarantee!
+
+### Dedicated support
+
+If you have any questions, please do not hesitate to contact us at telephone number 1-8000-ExUnit
+
+---
 
 ## Motivation
 
 To enchance the ExUnit testing framework, as it does not provide functions for lists assertion.
 
-The Copeiro main idea is to fill this gap with a powerfull idiomatic DSL. Example:
+The Copeiro main goal is to fill this gap with an idiomatic DSL.
 
 ```elixir
-a = 1
-assert_lists [{:c, _}, {:a, ^a}] in [{:c, 3}, {:b, 2}, {:a, 1}]
+assert_lists [{:c, _}, {:a, 1}] in [{:c, 3}, {:b, 2}, {:a, 1}]
 ```
 
 ## Installation
@@ -25,6 +40,8 @@ end
 
 ## Usage
 
+Using Copeiro in a test file
+
 ```elixir
 def HelloWorldTest do
   use ExUnit.Case, async: true
@@ -36,15 +53,31 @@ def HelloWorldTest do
 end
 ```
 
+Adding Copeiro to your [CaseTemplate](https://hexdocs.pm/ex_unit/ExUnit.CaseTemplate.html) _(recommended)_
+
+```elixir
+defmodule MyCase do
+  use ExUnit.CaseTemplate
+
+  using do
+    quote do
+      # This code is injected into every case that calls "use MyCase"
+      require Copeiro
+      import Copeiro
+    end
+  end
+end
+```
+
 ## Examples
 
-For the following examples we will use `LEFT` and `RIGHT` to describe the expression:
+  For the following examples `LEFT` and `RIGHT` will be used to describe the expression:
+  
+  `assert_lists LEFT OPERATOR RIGHT`
 
-`assert_lists LEFT OPERATOR RIGHT`
+### All elements of `LEFT` are also elements of `RIGHT`
 
-### All elements of `LEFT` are also elements of `B`
-
-  ```
+  ```elixir
   iex> assert_lists [1, 2] in [0, 2, 1, 3]
   true
 
@@ -57,7 +90,7 @@ For the following examples we will use `LEFT` and `RIGHT` to describe the expres
 
 ### `LEFT` and `RIGHT` has no element in common
 
-  ```
+  ```elixir
   iex> assert_lists [1, 2] not in [3, 4]
   true
 
@@ -70,10 +103,36 @@ For the following examples we will use `LEFT` and `RIGHT` to describe the expres
 
 ### Asserts that two lists matches in any order
 
-  ```
+  ```elixir
   iex> assert_lists [1, 2, 3] == [2, 1, 3], any_order: true
   true
 
   iex> assert_lists [{:a, 0}, {:b, 1}, {:c, 3}] == [{:a, 0}, {:c, 3}, {:b, 1}], any_order: true
   true
   ```
+
+### Basic assertions
+
+  ```elixir
+  iex> assert_lists [1, 2, 3] == [1, 2, 3]
+  true
+
+  iex> assert_lists [1, _, _] = [1, 2, 3]
+  true
+  ```
+
+## Helpful error messages
+
+  ```
+  assert_lists [%{a: _}, %{d: 4}] not in [%{a: 1}, %{b: 2}]
+
+     match succeeded, but should have failed
+     left: %{a: _}
+     right: [%{a: 1}, %{b: 2}]
+  ```
+
+## License
+
+MIT License
+
+Copyright (c) 2021 Felipe Beline Baravieira
