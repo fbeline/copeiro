@@ -5,58 +5,67 @@ defmodule Copeiro do
 
   @doc false
   def __assert_lists__({:==, _, [left, right]}, any_order: true) do
-    quote do
-      r = Copeiro.__match_lists_at_any_order__(unquote(left), unquote(right))
-
-      case r do
-        :ok ->
-          true
-
+    quote bind_quoted: [left: left, right: right] do
+      left
+      |> Copeiro.__match_lists_at_any_order__(right)
+      |> case do
         {:error, l, r} ->
           ExUnit.Assertions.flunk("""
-          lists does not match
+          assertion failed, lists does not match
           left: #{inspect(l)}
           right: #{inspect(r)}
           """)
+
+        :ok ->
+          true
       end
     end
   end
 
   def __assert_lists__({:in, _, [left, right]}, _opts) do
-    combinations = Copeiro.__match_combinations__(left, right)
-
-    quote do
-      unquote(combinations)
-      |> Copeiro.__reduce_combinations__()
+    quote bind_quoted: [left: left, right: right] do
+      left
+      |> Enum.reduce_while(true, fn l, acc ->
+        case l in right do
+          true -> {:cont, true}
+          false -> {:halt, {:error, l}}
+        end
+      end)
       |> case do
-        [] ->
-          true
-
-        missing_patterns ->
+        {:error, value} ->
           ExUnit.Assertions.flunk("""
-          could not match patterns: #{Enum.join(missing_patterns, ", ")}
-          right: #{inspect(unquote(right))}
+          assertion failed, value not found
+          value: #{inspect(value)}
+          left: #{inspect(left)}
+          right: #{inspect(right)}
           """)
+
+        _ ->
+          true
       end
     end
   end
 
   def __assert_lists__({:not, _, [{:in, _, [left, right]}]}, _opts) do
-    combinations = Copeiro.__match_combinations__(left, right)
-
-    quote do
-      unquote(combinations)
-      |> Copeiro.__reduce_combinations__(:not_in)
+    quote bind_quoted: [left: left, right: right] do
+      left
+      |> Enum.reduce_while(true, fn l, acc ->
+        case l not in right do
+          true -> {:cont, true}
+          false -> {:halt, {:error, l}}
+        end
+      end)
       |> case do
-        [] ->
-          true
-
-        patterns ->
+        {:error, value} ->
           ExUnit.Assertions.flunk("""
           match succeeded, but should have failed
-          left: #{Enum.join(patterns, ", ")}
-          right: #{inspect(unquote(right))}
+          value: #{inspect(value)}
+          left: #{inspect(left)}
+          right: #{inspect(right)}
           """)
+
+        _ ->
+          true
       end
     end
   end
@@ -65,37 +74,6 @@ defmodule Copeiro do
     quote do
       unquote({:assert, [], [{op, [], [left, right]}]})
     end
-  end
-
-  @doc false
-  def __reduce_combinations__(combinations, op \\ :in) do
-    combinations
-    |> Enum.filter(fn r ->
-      any? = Enum.any?(r, fn [ok?, _] -> ok? end)
-      if op == :not_in, do: any?, else: not any?
-    end)
-    |> Enum.reduce([], fn [[_, l] | _], acc -> [l | acc] end)
-  end
-
-  @doc false
-  def __match_combinations__(left, right) do
-    Enum.map(left, fn l ->
-      Enum.map(right, fn r ->
-        [
-          {:case, [],
-           [
-             r,
-             [
-               do: [
-                 {:->, [generated: true], [[l], true]},
-                 {:->, [generated: true], [[{:_, [], Elixir}], false]}
-               ]
-             ]
-           ]},
-          Macro.to_string(l)
-        ]
-      end)
-    end)
   end
 
   @doc false
@@ -135,10 +113,7 @@ defmodule Copeiro do
     iex> assert_lists [1, 2] in [0, 2, 1, 3]
     true
 
-    iex> assert_lists [{:b, _}, {:a, 1}] in [{:a, 1}, {:b, 2}, {:c, 3}]
-    true
-
-    iex> assert_lists [%{b: 2}] in [%{a: 1}, %{b: 2, c: 10}]
+    iex> assert_lists [{:a, 1}, {:c, 3}] in [{:a, 1}, {:b, 2}, {:c, 3}]
     true
     ```
 
@@ -146,9 +121,6 @@ defmodule Copeiro do
 
     ```
     iex> assert_lists [1, 2] not in [3, 4]
-    true
-
-    iex> assert_lists [{:c, _}] not in [{:a, 1}, {:b, 2}]
     true
 
     iex> assert_lists [%{c: 3}, %{d: 4}] not in [%{a: 1}, %{b: 2}]

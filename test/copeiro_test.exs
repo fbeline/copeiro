@@ -25,57 +25,40 @@ defmodule CopeiroTest do
       assert_lists [0, 2, 1, 3] == [0, 1, 2], any_order: true
     rescue
       error in [ExUnit.AssertionError] ->
-        assert "lists does not match" <> _ = error.message
+        assert "assertion failed, lists does not match" <> _ = error.message
     end
 
     test "in any order - more elements at right" do
       assert_lists [0, 2, 1] == [0, 1, 2, 3], any_order: true
     rescue
       error in [ExUnit.AssertionError] ->
-        assert "lists does not match" <> _ = error.message
+        assert "assertion failed, lists does not match" <> _ = error.message
     end
   end
 
   describe "assert_lists - operator: in -" do
-    test "contains pattern" do
-      assert_lists [%{a: 1}] in [%{a: 1, b: 1}, %{a: 2, b: 2}]
+    test "all elements of LEFT are also elements of RIGHT" do
+      assert_lists [1, 2] in [4, 3, 2, 1]
     end
 
-    test "pattern not present" do
-      assert_lists [%{a: 3, b: 1}] in [%{a: 1, b: 1}, %{a: 2, b: 2}]
+    test "one or more elements of LEFT missing at RIGHT" do
+      assert_lists [%{a: 1, b: 1}, %{a: 3, b: 3}] in [%{a: 1, b: 1}, %{a: 2, b: 2}]
     rescue
       error in [ExUnit.AssertionError] ->
-        assert "could not match patterns: %{a: 3, b: 1}" <> _ = error.message
-    end
-
-    test "able to match custom patterns" do
-      value = 2
-      assert_lists [%{a: _, b: ^value}] in [%{a: 1, b: 1}, %{a: 2, b: 2}]
-    end
-
-    test "return all missing patterns" do
-      assert_lists [{3, _}, {2, 2}] in [{1, 2}, {2, 3}]
-    rescue
-      error in [ExUnit.AssertionError] ->
-        assert "could not match patterns: {2, 2}, {3, _}" <> _ = error.message
+        assert "assertion failed, value not found\nvalue: %{a: 3, b: 3}" <> _ = error.message
     end
   end
 
   describe "assert_lists - operator: not in -" do
-    test "pattern not present" do
+    test "LEFT and RIGHT has no element in common" do
       assert_lists [%{a: 10}] not in [%{a: 1, b: 1}, %{a: 2, b: 2}]
     end
 
-    test "contains pattern" do
+    test "match succeeded, but should have failed" do
       assert_lists [%{a: 3, b: 1}] not in [%{a: 1, b: 1}, %{a: 2, b: 2}]
     rescue
       error in [ExUnit.AssertionError] ->
         assert "match succeeded, but should have failed" <> _ = error.message
-    end
-
-    test "able to match custom patterns" do
-      value = 3
-      assert_lists [%{a: _, b: ^value}] not in [%{a: 1, b: 1}, %{a: 2, b: 2}]
     end
   end
 
@@ -86,14 +69,20 @@ defmodule CopeiroTest do
     end
   end
 
-  # property "assert_lists - operator: in" do
-  #   forall right <- list(any()) do
-  #     n = Enum.random(1..length(right))
-  #     left = Enum.take_random(right, n)
+  property "assert_lists - operator: in" do
+    forall right <- list(any()) do
+      n = Enum.random(1..length(right))
+      left = Enum.take_random(right, n)
 
-  #     IO.inspect(left)
+      assert_lists left in right
+    end
+  end
 
-  #     assert_lists left in right
-  #   end
-  # end
+  property "assert_lists - operator: not in" do
+    forall [aux, right] <- [list(), list()] do
+      left = MapSet.difference(MapSet.new(aux), MapSet.new(right))
+
+      assert_lists left not in right
+    end
+  end
 end

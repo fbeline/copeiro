@@ -18,14 +18,12 @@ If you have any questions, please do not hesitate to contact us at telephone num
 
 ---
 
-## Motivation
+## Goal
 
-To enchance the ExUnit testing framework, as it does not provide functions for lists assertion.
-
-The Copeiro main goal is to fill this gap with an idiomatic DSL.
+The main goal is to extend the ExUnit testing framework with an idiomatic DSL.
 
 ```elixir
-assert_lists [{:c, _}, {:a, 1}] in [{:c, 3}, {:b, 2}, {:a, 1}]
+assert_lists [{:c, 3}, {:a, 1}] in [{:c, 3}, {:b, 2}, {:a, 1}]
 ```
 
 ## Installation
@@ -81,10 +79,7 @@ end
   iex> assert_lists [1, 2] in [0, 2, 1, 3]
   true
 
-  iex> assert_lists [{:b, _}, {:a, 1}] in [{:a, 1}, {:b, 2}, {:c, 3}]
-  true
-
-  iex> assert_lists [%{b: 2}] in [%{a: 1}, %{b: 2, c: 10}]
+  iex> assert_lists [{:b, 2}, {:a, 1}] in [{:a, 1}, {:b, 2}, {:c, 3}]
   true
   ```
 
@@ -92,9 +87,6 @@ end
 
   ```elixir
   iex> assert_lists [1, 2] not in [3, 4]
-  true
-
-  iex> assert_lists [{:c, _}] not in [{:a, 1}, {:b, 2}]
   true
 
   iex> assert_lists [%{c: 3}, %{d: 4}] not in [%{a: 1}, %{b: 2}]
@@ -124,10 +116,11 @@ end
 ## Helpful error messages
 
   ```
-  assert_lists [%{a: _}, %{d: 4}] not in [%{a: 1}, %{b: 2}]
+  assert_lists [%{d: 4}, %{a: 1}] not in [%{a: 1}, %{b: 2}]
 
      match succeeded, but should have failed
-     left: %{a: _}
+     value: %{a: 1}
+     left: [%{d: 4}, %{a: 1}]
      right: [%{a: 1}, %{b: 2}]
   ```
 
