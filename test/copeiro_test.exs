@@ -1,5 +1,6 @@
 defmodule CopeiroTest do
   use ExUnit.Case
+  use PropCheck
 
   require Copeiro
   import Copeiro
@@ -77,4 +78,22 @@ defmodule CopeiroTest do
       assert_lists [%{a: _, b: ^value}] not in [%{a: 1, b: 1}, %{a: 2, b: 2}]
     end
   end
+
+  property "assert_lists - in any order" do
+    forall right <- list(any()) do
+      left = Enum.shuffle(right)
+      assert_lists left == right, any_order: true
+    end
+  end
+
+  # property "assert_lists - operator: in" do
+  #   forall right <- list(any()) do
+  #     n = Enum.random(1..length(right))
+  #     left = Enum.take_random(right, n)
+
+  #     IO.inspect(left)
+
+  #     assert_lists left in right
+  #   end
+  # end
 end

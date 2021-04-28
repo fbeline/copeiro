@@ -14,7 +14,7 @@
 
 ### Dedicated support
 
-If you have any questions, please do not hesitate to contact us at telephone number 1-8000-ExUnit
+If you have any questions, please do not hesitate to contact us at telephone number __1-8000-ExUnit__
 
 ---
 
