@@ -17,7 +17,8 @@ defmodule Copeiro do
           {:error, l, r} ->
             ExUnit.Assertions.flunk("""
             assertion failed, lists does not match
-            left: #{inspect(l)}
+            value: #{inspect(l)}
+            left: #{inspect(left)}
             right: #{inspect(r)}
             """)
 
