@@ -49,6 +49,27 @@ defmodule CopeiroTest do
     end
   end
 
+  describe "assert_lists - opts: keys -" do
+
+    defmodule Person do
+      defstruct name: "John", age: 27
+    end
+
+    test "operator: in" do
+      assert_lists [%{a: 1}, %{a: 2}] in [%{a: 1, b: 1}, %{a: 2, b: 2}, %{a: 3, b: 3}], keys: [:a]
+    end
+
+    test "operator: ==" do
+      assert_lists [%{a: 1}, %{a: 2}] == [%{a: 2, b: 2}, %{a: 1, b: 1}],
+        keys: [:a],
+        any_order: true
+    end
+
+    test "work with structs" do
+      assert_lists [%Person{name: "john", age: 20}] == [%Person{name: "Jane", age: 20}], keys: [:age]
+    end
+  end
+
   describe "assert_lists - operator: not in -" do
     test "LEFT and RIGHT has no element in common" do
       assert_lists [%{a: 10}] not in [%{a: 1, b: 1}, %{a: 2, b: 2}]

@@ -113,6 +113,18 @@ end
   true
   ```
 
+### Asserting lists of maps/structs
+
+  When asserting maps and or structs you can compose the expression with `keys`
+
+  ```
+  iex> assert_lists [%{a: 1}, %{a: 2}] in [%{a: 1, b: 1}, %{a: 2, b: 2}, %{a: 3, b: 3}], keys: [:a]
+  true
+
+  iex> assert_lists [%Person{name: "john", age: 20}] == [%Person{name: "Jane", age: 20}], keys: [:age]
+  true
+  ```
+
 ## Helpful error messages
 
   ```

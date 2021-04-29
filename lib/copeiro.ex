@@ -4,26 +4,36 @@ defmodule Copeiro do
   """
 
   @doc false
-  def __assert_lists__({:==, _, [left, right]}, any_order: true) do
-    quote bind_quoted: [left: left, right: right] do
-      left
-      |> Copeiro.__match_lists_at_any_order__(right)
-      |> case do
-        {:error, l, r} ->
-          ExUnit.Assertions.flunk("""
-          assertion failed, lists does not match
-          left: #{inspect(l)}
-          right: #{inspect(r)}
-          """)
+  def __assert_lists__({:==, _, [left, right]}, opts) do
+    quote bind_quoted: [left: left, right: right, opts: opts] do
+      [left, right] = Copeiro.__map_keys__(left, right, opts)
 
-        :ok ->
-          true
+      in_any_order? = Keyword.get(opts, :any_order, false)
+
+      if in_any_order? do
+        left
+        |> Copeiro.__match_lists_at_any_order__(right)
+        |> case do
+          {:error, l, r} ->
+            ExUnit.Assertions.flunk("""
+            assertion failed, lists does not match
+            left: #{inspect(l)}
+            right: #{inspect(r)}
+            """)
+
+          :ok ->
+            true
+        end
+      else
+        assert left == right
       end
     end
   end
 
-  def __assert_lists__({:in, _, [left, right]}, _opts) do
-    quote bind_quoted: [left: left, right: right] do
+  def __assert_lists__({:in, _, [left, right]}, opts) do
+    quote bind_quoted: [left: left, right: right, opts: opts] do
+      [left, right] = Copeiro.__map_keys__(left, right, opts)
+
       left
       |> Enum.reduce_while(true, fn l, acc ->
         case l in right do
@@ -46,8 +56,10 @@ defmodule Copeiro do
     end
   end
 
-  def __assert_lists__({:not, _, [{:in, _, [left, right]}]}, _opts) do
-    quote bind_quoted: [left: left, right: right] do
+  def __assert_lists__({:not, _, [{:in, _, [left, right]}]}, opts) do
+    quote bind_quoted: [left: left, right: right, opts: opts] do
+      [left, right] = Copeiro.__map_keys__(left, right, opts)
+
       left
       |> Enum.reduce_while(true, fn l, acc ->
         case l not in right do
@@ -73,6 +85,18 @@ defmodule Copeiro do
   def __assert_lists__({op, _, [left, right]}, _opts) when op in [:=, :==] do
     quote do
       unquote({:assert, [], [{op, [], [left, right]}]})
+    end
+  end
+
+  @doc false
+  def __map_keys__(left, right, opts) do
+    keys = Keyword.get(opts, :keys, [])
+
+    if keys == [] do
+      [left, right]
+    else
+      t = fn lst -> Enum.map(lst, &Map.take(&1, keys)) end
+      [t.(left), t.(right)]
     end
   end
 
@@ -134,6 +158,16 @@ defmodule Copeiro do
     true
 
     iex> assert_lists [{:a, 0}, {:b, 1}, {:c, 3}] == [{:a, 0}, {:c, 3}, {:b, 1}], any_order: true
+    true
+    ```
+
+  ### Asserting lists of maps/structs
+
+    ```
+    iex> assert_lists [%{a: 1}, %{a: 2}] in [%{a: 1, b: 1}, %{a: 2, b: 2}, %{a: 3, b: 3}], keys: [:a]
+    true
+
+    iex> assert_lists [%{a: 1}, %{a: 2}] == [%{a: 2, b: 2}, %{a: 1, b: 1}], keys: [:a], any_order: true
     true
     ```
   """
