@@ -8,12 +8,11 @@ defmodule Copeiro do
     left
     |> Copeiro.Comparator.match_lists_in_any_order(right)
     |> case do
-      {:error, l, r} ->
+      {:error, _, _} ->
         ExUnit.Assertions.flunk("""
         assertion failed, lists does not match
-        value: #{inspect(l)}
         left: #{inspect(left)}
-        right: #{inspect(r)}
+        right: #{inspect(right)}
         """)
 
       :ok ->
@@ -106,7 +105,7 @@ defmodule Copeiro do
     true
     ```
 
-  ### Asserts that two lists matches in any order
+  ### Asserts that two lists match in any order
 
     ```
     iex> assert_lists [1, 2, 3] == [2, 1, 3], any_order: true

@@ -13,8 +13,11 @@ defmodule CopeiroTest do
       assert_lists [1, 2, 3] == [3, 2, 1]
     rescue
       error in [ExUnit.AssertionError] ->
-        assert "Comparison (using ==) failed in:\nleft: [1, 2, 3]\nright: [3, 2, 1]\n" ==
-                 error.message
+        assert """
+               Comparison (using ==) failed in:
+               left: [1, 2, 3]
+               right: [3, 2, 1]
+               """ == error.message
     end
 
     test "in any order" do
@@ -27,14 +30,22 @@ defmodule CopeiroTest do
       assert_lists [0, 2, 1, 3] == [0, 1, 2], any_order: true
     rescue
       error in [ExUnit.AssertionError] ->
-        assert "assertion failed, lists does not match" <> _ = error.message
+        assert """
+               assertion failed, lists does not match
+               left: [0, 2, 1, 3]
+               right: [0, 1, 2]
+               """ == error.message
     end
 
     test "in any order - more elements at right" do
       assert_lists [0, 2, 1] == [0, 1, 2, 3], any_order: true
     rescue
       error in [ExUnit.AssertionError] ->
-        assert "assertion failed, lists does not match" <> _ = error.message
+        assert """
+               assertion failed, lists does not match
+               left: [0, 2, 1]
+               right: [0, 1, 2, 3]
+               """ == error.message
     end
   end
 
@@ -47,7 +58,12 @@ defmodule CopeiroTest do
       assert_lists [%{a: 1, b: 1}, %{a: 3, b: 3}] in [%{a: 1, b: 1}, %{a: 2, b: 2}]
     rescue
       error in [ExUnit.AssertionError] ->
-        assert "assertion failed, value not found\nvalue: %{a: 3, b: 3}" <> _ = error.message
+        assert """
+               assertion failed, value not found
+               value: %{a: 3, b: 3}
+               left: [%{a: 1, b: 1}, %{a: 3, b: 3}]
+               right: [%{a: 1, b: 1}, %{a: 2, b: 2}]
+               """ == error.message
     end
   end
 
