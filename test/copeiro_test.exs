@@ -101,12 +101,6 @@ defmodule CopeiroTest do
     end
   end
 
-  property "assert_lists - pure " do
-    forall input <- list(any()) do
-      assert_lists input == input
-    end
-  end
-
   property "assert_lists - in any order" do
     forall right <- list(any()) do
       left = Enum.shuffle(right)
