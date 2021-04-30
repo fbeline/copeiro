@@ -8,13 +8,6 @@ defmodule CopeiroTest do
   doctest Copeiro
 
   describe "assert_lists - operator: = and == -" do
-    test "sanity pattern matching" do
-      v = 1
-      assert_lists [1, 2] = [1, 2]
-      assert_lists [1, _] = [1, 2]
-      assert_lists [^v, _] = [1, 2]
-    end
-
     test "in any order" do
       assert_lists [0, 2, 1] == [0, 1, 2], any_order: true
 

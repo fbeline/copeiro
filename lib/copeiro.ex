@@ -4,86 +4,68 @@ defmodule Copeiro do
   """
 
   @doc false
-  def __assert_lists__({:==, _, [left, right]}, opts) do
-    quote bind_quoted: [left: left, right: right, opts: opts] do
-      [left, right] = Copeiro.__map_keys__(left, right, opts)
+  def __assert_lists__(:==, left, right, any_order: true) do
+    left
+    |> Copeiro.__match_lists_in_any_order__(right)
+    |> case do
+      {:error, l, r} ->
+        ExUnit.Assertions.flunk("""
+        assertion failed, lists does not match
+        value: #{inspect(l)}
+        left: #{inspect(left)}
+        right: #{inspect(r)}
+        """)
 
-      in_any_order? = Keyword.get(opts, :any_order, false)
-
-      if in_any_order? do
-        left
-        |> Copeiro.__match_lists_at_any_order__(right)
-        |> case do
-          {:error, l, r} ->
-            ExUnit.Assertions.flunk("""
-            assertion failed, lists does not match
-            value: #{inspect(l)}
-            left: #{inspect(left)}
-            right: #{inspect(r)}
-            """)
-
-          :ok ->
-            true
-        end
-      else
-        assert left == right
-      end
+      :ok ->
+        true
     end
   end
 
-  def __assert_lists__({:in, _, [left, right]}, opts) do
-    quote bind_quoted: [left: left, right: right, opts: opts] do
-      [left, right] = Copeiro.__map_keys__(left, right, opts)
-
-      left
-      |> Enum.reduce_while(true, fn l, acc ->
-        case l in right do
-          true -> {:cont, true}
-          false -> {:halt, {:error, l}}
-        end
-      end)
-      |> case do
-        {:error, value} ->
-          ExUnit.Assertions.flunk("""
-          assertion failed, value not found
-          value: #{inspect(value)}
-          left: #{inspect(left)}
-          right: #{inspect(right)}
-          """)
-
-        _ ->
-          true
+  def __assert_lists__(:in, left, right, _opts) do
+    left
+    |> Enum.reduce_while(true, fn l, _ ->
+      case l in right do
+        true -> {:cont, true}
+        false -> {:halt, {:error, l}}
       end
+    end)
+    |> case do
+      {:error, value} ->
+        ExUnit.Assertions.flunk("""
+        assertion failed, value not found
+        value: #{inspect(value)}
+        left: #{inspect(left)}
+        right: #{inspect(right)}
+        """)
+
+      _ ->
+        true
     end
   end
 
-  def __assert_lists__({:not, _, [{:in, _, [left, right]}]}, opts) do
-    quote bind_quoted: [left: left, right: right, opts: opts] do
-      [left, right] = Copeiro.__map_keys__(left, right, opts)
-
-      left
-      |> Enum.reduce_while(true, fn l, acc ->
-        case l not in right do
-          true -> {:cont, true}
-          false -> {:halt, {:error, l}}
-        end
-      end)
-      |> case do
-        {:error, value} ->
-          ExUnit.Assertions.flunk("""
-          match succeeded, but should have failed
-          value: #{inspect(value)}
-          left: #{inspect(left)}
-          right: #{inspect(right)}
-          """)
-
-        _ ->
-          true
+  def __assert_lists__(:not_in, left, right, _opts) do
+    left
+    |> Enum.reduce_while(true, fn l, _ ->
+      case l not in right do
+        true -> {:cont, true}
+        false -> {:halt, {:error, l}}
       end
+    end)
+    |> case do
+      {:error, value} ->
+        ExUnit.Assertions.flunk("""
+        match succeeded, but should have failed
+        value: #{inspect(value)}
+        left: #{inspect(left)}
+        right: #{inspect(right)}
+        """)
+
+      _ ->
+        true
     end
   end
 
-  def __assert_lists__({op, _, [left, right]}, _opts) when op in [:=, :==] do
+  def __assert_lists__(op, left, right, _opts) when op in [:=, :==] do
     quote do
       unquote({:assert, [], [{op, [], [left, right]}]})
     end
@@ -94,23 +76,23 @@ defmodule Copeiro do
     keys = Keyword.get(opts, :keys, [])
 
     if keys == [] do
-      [left, right]
+      [left, right, opts]
     else
       t = fn lst -> Enum.map(lst, &Map.take(&1, keys)) end
-      [t.(left), t.(right)]
+      [t.(left), t.(right), Keyword.delete(opts, :keys)]
     end
   end
 
   @doc false
-  def __match_lists_at_any_order__([], []) do
+  def __match_lists_in_any_order__([], []) do
     :ok
   end
 
-  def __match_lists_at_any_order__([], right) do
+  def __match_lists_in_any_order__([], right) do
     {:error, [], right}
   end
 
-  def __match_lists_at_any_order__([left | t], right) do
+  def __match_lists_in_any_order__([left | t], right) do
     right
     |> Enum.find_index(&(&1 == left))
     |> case do
@@ -118,7 +100,7 @@ defmodule Copeiro do
         {:error, left, right}
 
       idx ->
-        __match_lists_at_any_order__(
+        __match_lists_in_any_order__(
           t,
           List.delete_at(right, idx)
         )
@@ -173,6 +155,15 @@ defmodule Copeiro do
     ```
   """
   defmacro assert_lists(expr, opts \\ []) do
-    quote do: unquote(__assert_lists__(expr, opts))
+    {op, left, right} =
+      case expr do
+        {:not, _, [{:in, _, [left, right]}]} -> {:not_in, left, right}
+        {op, _, [left, right]} -> {op, left, right}
+      end
+
+    quote bind_quoted: [op: op, left: left, right: right, opts: opts] do
+      [left, right, opts] = Copeiro.__map_keys__(left, right, opts)
+      Copeiro.__assert_lists__(op, left, right, opts)
+    end
   end
 end

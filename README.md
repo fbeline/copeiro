@@ -103,16 +103,6 @@ end
   true
   ```
 
-### Basic assertions
-
-  ```elixir
-  iex> assert_lists [1, 2, 3] == [1, 2, 3]
-  true
-
-  iex> assert_lists [1, _, _] = [1, 2, 3]
-  true
-  ```
-
 ### Asserting lists of maps/structs
 
   When asserting maps and or structs you can compose the expression with `keys`
