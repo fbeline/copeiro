@@ -7,7 +7,6 @@ defmodule Copeiro.Case do
 
   using do
     quote do
-      require Copeiro
       import Copeiro
     end
   end

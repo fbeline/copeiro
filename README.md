@@ -48,9 +48,7 @@ Using Copeiro in a test file
 def HelloWorldTest do
   use ExUnit.Case, async: true
 
-  require Copeiro
   import Copeiro
-
   # ...
 end
 ```
@@ -64,7 +62,6 @@ defmodule MyCase do
   using do
     quote do
       # This code is injected into every case that calls "use MyCase"
-      require Copeiro
       import Copeiro
     end
   end
