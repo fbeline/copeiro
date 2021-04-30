@@ -6,7 +6,7 @@ defmodule Copeiro do
   @doc false
   def __assert_lists__(:==, left, right, any_order: true) do
     left
-    |> Copeiro.__match_lists_in_any_order__(right)
+    |> Copeiro.Comparator.match_lists_in_any_order(right)
     |> case do
       {:error, l, r} ->
         ExUnit.Assertions.flunk("""
@@ -17,6 +17,20 @@ defmodule Copeiro do
         """)
 
       :ok ->
+        true
+    end
+  end
+
+  def __assert_lists__(:==, left, right, _opts) do
+    case left == right do
+      false ->
+        ExUnit.Assertions.flunk("""
+        Comparison (using ==) failed in:
+        left: #{inspect(left)}
+        right: #{inspect(right)}
+        """)
+
+      _ ->
         true
     end
   end
@@ -62,48 +76,6 @@ defmodule Copeiro do
 
       _ ->
         true
-    end
-  end
-
-  def __assert_lists__(op, left, right, _opts) when op in [:=, :==] do
-    quote do
-      unquote({:assert, [], [{op, [], [left, right]}]})
-    end
-  end
-
-  @doc false
-  def __map_keys__(left, right, opts) do
-    keys = Keyword.get(opts, :keys, [])
-
-    if keys == [] do
-      [left, right, opts]
-    else
-      t = fn lst -> Enum.map(lst, &Map.take(&1, keys)) end
-      [t.(left), t.(right), Keyword.delete(opts, :keys)]
-    end
-  end
-
-  @doc false
-  def __match_lists_in_any_order__([], []) do
-    :ok
-  end
-
-  def __match_lists_in_any_order__([], right) do
-    {:error, [], right}
-  end
-
-  def __match_lists_in_any_order__([left | t], right) do
-    right
-    |> Enum.find_index(&(&1 == left))
-    |> case do
-      nil ->
-        {:error, left, right}
-
-      idx ->
-        __match_lists_in_any_order__(
-          t,
-          List.delete_at(right, idx)
-        )
     end
   end
 
@@ -162,7 +134,18 @@ defmodule Copeiro do
       end
 
     quote bind_quoted: [op: op, left: left, right: right, opts: opts] do
-      [left, right, opts] = Copeiro.__map_keys__(left, right, opts)
+      [left, right, opts] =
+        (fn left, right, opts ->
+           keys = Keyword.get(opts, :keys, [])
+
+           if keys == [] do
+             [left, right, opts]
+           else
+             t = fn lst -> Enum.map(lst, &Map.take(&1, keys)) end
+             [t.(left), t.(right), Keyword.delete(opts, :keys)]
+           end
+         end).(left, right, opts)
+
       Copeiro.__assert_lists__(op, left, right, opts)
     end
   end

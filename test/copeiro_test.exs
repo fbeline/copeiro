@@ -1,13 +1,22 @@
 defmodule CopeiroTest do
-  use ExUnit.Case
+  use Copeiro.Case
   use PropCheck
-
-  require Copeiro
-  import Copeiro
 
   doctest Copeiro
 
-  describe "assert_lists - operator: = and == -" do
+  describe "assert_lists - operator: == -" do
+    test "pure assertion" do
+      assert_lists [1, 2, 3] == [1, 2, 3]
+    end
+
+    test "pure assertion - fail" do
+      assert_lists [1, 2, 3] == [3, 2, 1]
+    rescue
+      error in [ExUnit.AssertionError] ->
+        assert "Comparison (using ==) failed in:\nleft: [1, 2, 3]\nright: [3, 2, 1]\n" ==
+                 error.message
+    end
+
     test "in any order" do
       assert_lists [0, 2, 1] == [0, 1, 2], any_order: true
 
@@ -43,7 +52,6 @@ defmodule CopeiroTest do
   end
 
   describe "assert_lists - opts: keys -" do
-
     defmodule Person do
       defstruct name: "John", age: 27
     end
@@ -59,7 +67,8 @@ defmodule CopeiroTest do
     end
 
     test "work with structs" do
-      assert_lists [%Person{name: "john", age: 20}] == [%Person{name: "Jane", age: 20}], keys: [:age]
+      assert_lists [%Person{name: "john", age: 20}] == [%Person{name: "Jane", age: 20}],
+        keys: [:age]
     end
   end
 
@@ -73,6 +82,12 @@ defmodule CopeiroTest do
     rescue
       error in [ExUnit.AssertionError] ->
         assert "match succeeded, but should have failed" <> _ = error.message
+    end
+  end
+
+  property "assert_lists - pure " do
+    forall input <- list(any()) do
+      assert_lists input == input
     end
   end
 
