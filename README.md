@@ -18,9 +18,13 @@ If you have any questions, please do not hesitate to contact us at telephone num
 
 ---
 
-## Goal
+## Motivation
 
-The main goal is to extend the ExUnit testing framework with an idiomatic DSL.
+Very often we need to iterate and transform results while writing tests and asserting lists.
+
+This data manipulation inside test statements becomes a repetitive task as the project grows. Making tests less readable and increasing the chances of mistakes. 
+
+The Copeiro main goal is to extend the ExUnit with an idiomatic DSL that seamless integrates to it.
 
 ```elixir
 assert_lists [{:c, 3}, {:a, 1}] in [{:c, 3}, {:b, 2}, {:a, 1}]
@@ -93,7 +97,7 @@ end
   true
   ```
 
-### Asserts that two lists matches in any order
+### Asserts that two lists match in any order
 
   ```elixir
   iex> assert_lists [1, 2, 3] == [2, 1, 3], any_order: true
