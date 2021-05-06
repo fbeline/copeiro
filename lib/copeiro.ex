@@ -21,16 +21,14 @@ defmodule Copeiro do
   end
 
   def __assert_lists__(:==, left, right, _opts) do
-    case left == right do
-      false ->
-        ExUnit.Assertions.flunk("""
-        Comparison (using ==) failed in:
-        left: #{inspect(left)}
-        right: #{inspect(right)}
-        """)
-
-      _ ->
-        true
+    if left == right do
+      true
+    else
+      ExUnit.Assertions.flunk("""
+      Comparison (using ==) failed in:
+      left: #{inspect(left)}
+      right: #{inspect(right)}
+      """)
     end
   end
 
