@@ -26,6 +26,32 @@ defmodule CopeiroTest do
       assert_lists [%{a: 1}, %{b: 2}, %{c: 3}] == [%{a: 1}, %{c: 3}, %{b: 2}], any_order: true
     end
 
+    test "with repeated items" do
+      assert_lists [0, 0, 1, 2] == [0, 0, 1, 2], any_order: true
+    end
+
+    test "with repeated items fails on wrong multiplicity on the left" do
+      assert_lists [0, 0, 1, 2] == [0, 1, 2], any_order: true
+    rescue
+      error in [ExUnit.AssertionError] ->
+        assert """
+               assertion failed, lists does not match
+               left: [0, 0, 1, 2]
+               right: [0, 1, 2, 3, 5]
+               """ == error.message
+    end
+
+    test "with repeated items fails on wrong multiplicity on the right" do
+      assert_lists [0, 1, 2] == [0, 0, 1, 2], any_order: true
+    rescue
+      error in [ExUnit.AssertionError] ->
+        assert """
+               assertion failed, lists does not match
+               left: [0, 1, 2]
+               right: [0, 0, 1, 2]
+               """ == error.message
+    end
+
     test "in any order - more elements at left" do
       assert_lists [0, 2, 1, 3] == [0, 1, 2], any_order: true
     rescue
