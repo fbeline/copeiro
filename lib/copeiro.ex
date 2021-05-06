@@ -8,9 +8,9 @@ defmodule Copeiro do
 
   ## Examples
 
-  For the following examples`LEFT` and `RIGHT` will be used to describe the expression `assert_lists LEFT OPERATOR RIGHT`
+  For the following examples `left` and `right` will be used to describe the expression `assert_lists left OPERATOR right`
 
-  ### All elements of `LEFT` are also elements of `RIGHT`
+  ### All elements of `left` are also elements of `right`
 
     ```
     iex> assert_lists [1, 2] in [0, 2, 1, 3]
@@ -20,7 +20,7 @@ defmodule Copeiro do
     true
     ```
 
-  ### `LEFT` and `RIGHT` has no element in common
+  ### `left` and `right` has no element in common
 
     ```
     iex> assert_lists [1, 2] not in [3, 4]
