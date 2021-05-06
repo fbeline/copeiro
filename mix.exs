@@ -30,8 +30,8 @@ defmodule Copeiro.MixProject do
   defp deps do
     [
       {:propcheck, "~> 1.3", only: [:test, :dev]},
-      {:ex_doc, "~> 0.24", only: :dev, runtime: false},
-      {:credo, "~> 1.5", only: [:dev, :test], runtime: false}
+      {:ex_doc, "~> 0.24 or >= 0.0.0", only: :dev, runtime: false, optional: true},
+      {:credo, "~> 1.5 or >= 0.0.0", only: [:dev, :test], runtime: false, optional: true}
     ]
   end
 end
