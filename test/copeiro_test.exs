@@ -37,7 +37,7 @@ defmodule CopeiroTest do
         assert """
                assertion failed, lists does not match
                left: [0, 0, 1, 2]
-               right: [0, 1, 2, 3, 5]
+               right: [0, 1, 2]
                """ == error.message
     end
 
