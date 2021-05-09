@@ -4,7 +4,7 @@ defmodule Copeiro.MixProject do
   def project do
     [
       app: :copeiro,
-      version: "0.1.0",
+      version: "0.1.1",
       elixir: "~> 1.9",
       deps: deps(),
       name: "Copeiro",
