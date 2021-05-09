@@ -2,29 +2,11 @@
 
 <img align="left" height="300" src="https://user-images.githubusercontent.com/5730881/116327729-cf9fea00-a79d-11eb-9be4-d4fa5ece38ae.jpg">
 
-
->  With Copeiro, you can do twice the work in half the time.
->
-> -- <cite>satisfied customer</cite>
-
-### Reasons:
-
-- Only $0
-- 90 Day Money Back Guarantee!
-
-### Dedicated support
-
-If you have any questions, please do not hesitate to contact us at telephone number __1-8000-ExUnit__
-
----
-
 ## Motivation
 
-Very often we need to iterate and transform results while writing tests and asserting lists.
+Very often we need to iterate and transform results while writing tests and asserting lists. This data manipulation inside test statements becomes a repetitive task as the project grows, demanding extra efforts and sometimes producing bloated tests.
 
-This data manipulation inside test statements becomes a repetitive task as the project grows. Making tests less readable and increasing the chances of mistakes. 
-
-The Copeiro main goal is to extend the ExUnit with an idiomatic DSL that seamless integrates to it.
+The Copeiro main goal is to extend the ExUnit with an idiomatic DSL that seamless integrates to it, providing a simple way to assert lists of any type.
 
 ```elixir
 assert_lists [{:c, 3}, {:a, 1}] in [{:c, 3}, {:b, 2}, {:a, 1}]
@@ -35,7 +17,7 @@ assert_lists [{:c, 3}, {:a, 1}] in [{:c, 3}, {:b, 2}, {:a, 1}]
 ```elixir
 def deps do
   [
-    {:copeiro, "~> 0.1.0", only: :test}
+    {:copeiro, "~> 0.1.1", only: :test}
   ]
 end
 ```
