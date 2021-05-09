@@ -7,7 +7,7 @@ defmodule Copeiro.Comparator do
   end
 
   def match_lists_in_any_order([], right) do
-    {:error, [], right}
+    {:error, {:right, right}}
   end
 
   def match_lists_in_any_order([left | t], right) do
@@ -15,7 +15,7 @@ defmodule Copeiro.Comparator do
     |> Enum.find_index(&(&1 == left))
     |> case do
       nil ->
-        {:error, left, right}
+        {:error, {:left, [left]}}
 
       idx ->
         match_lists_in_any_order(

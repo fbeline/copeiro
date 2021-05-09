@@ -69,9 +69,10 @@ defmodule Copeiro do
     left
     |> Copeiro.Comparator.match_lists_in_any_order(right)
     |> case do
-      {:error, _, _} ->
+      {:error, {direction, value}} ->
         ExUnit.Assertions.flunk("""
         assertion failed, lists does not match
+        value-#{direction}: #{inspect(value)}
         left: #{inspect(left)}
         right: #{inspect(right)}
         """)

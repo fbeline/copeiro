@@ -36,6 +36,7 @@ defmodule CopeiroTest do
       error in [ExUnit.AssertionError] ->
         assert """
                assertion failed, lists does not match
+               value-left: [0]
                left: [0, 0, 1, 2]
                right: [0, 1, 2]
                """ == error.message
@@ -47,6 +48,7 @@ defmodule CopeiroTest do
       error in [ExUnit.AssertionError] ->
         assert """
                assertion failed, lists does not match
+               value-right: [0]
                left: [0, 1, 2]
                right: [0, 0, 1, 2]
                """ == error.message
@@ -58,19 +60,21 @@ defmodule CopeiroTest do
       error in [ExUnit.AssertionError] ->
         assert """
                assertion failed, lists does not match
+               value-left: [3]
                left: [0, 2, 1, 3]
                right: [0, 1, 2]
                """ == error.message
     end
 
     test "in any order - more elements at right" do
-      assert_lists [0, 2, 1] == [0, 1, 2, 3], any_order: true
+      assert_lists [0, 2, 1] == [0, 1, 2, 3, 4], any_order: true
     rescue
       error in [ExUnit.AssertionError] ->
         assert """
                assertion failed, lists does not match
+               value-right: [3, 4]
                left: [0, 2, 1]
-               right: [0, 1, 2, 3]
+               right: [0, 1, 2, 3, 4]
                """ == error.message
     end
   end
